@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>계산기 — Cadet Compass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<style>
+.page-header{background:linear-gradient(135deg,var(--sky-dark) 0%,var(--sky-mid) 100%);padding:36px 24px 30px;color:#fff}
+.page-header h1{font-size:26px;font-weight:900;margin-bottom:4px}
+.page-header p{font-size:13px;opacity:.7;font-weight:300}
+.main-tab-nav{background:var(--white);border-bottom:2px solid var(--border);position:sticky;top:58px;z-index:100}
+.main-tab-nav .tab-nav{max-width:1100px;margin:0 auto;padding:0 20px;border-bottom:none;margin-bottom:0}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:600px){.form-row{grid-template-columns:1fr}}
+.form-group{margin-bottom:14px}
+.input-row{display:flex;gap:8px;align-items:center}
+.input-row input{flex:1}
+.input-unit{font-size:13px;color:var(--muted);white-space:nowrap;font-weight:500;min-width:28px}
+.sem-count-badge{display:inline-block;font-size:11px;background:var(--sky-light);color:var(--sky-mid);padding:2px 8px;border-radius:10px;font-weight:600;margin-left:6px;vertical-align:middle}
+.type-select-wrap{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.type-radio{display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;border:1.5px solid var(--border);border-radius:8px;transition:all .15s;background:var(--white)}
+.type-radio:hover{border-color:var(--sky);background:var(--sky-light)}
+.type-radio input{accent-color:var(--sky)}
+.type-radio.checked{border-color:var(--sky);background:var(--sky-light)}
+.type-radio span{font-size:13px;font-weight:600;color:var(--text)}
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+.run-time-input{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+.run-time-colon{font-size:20px;font-weight:700;color:var(--muted);text-align:center}
+.section-label{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.interview-toggle{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px 14px;background:var(--surface);border-radius:8px;border:1px solid var(--border)}
+.toggle-switch{position:relative;width:40px;height:22px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;top:0;left:0;right:0;bottom:0;background:#ccc;border-radius:22px;cursor:pointer;transition:.2s}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:2px;bottom:2px;background:#fff;border-radius:50%;transition:.2s}
+.toggle-switch input:checked+.toggle-slider{background:var(--sky)}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(18px)}
+.toggle-label{font-size:13px;font-weight:600;color:var(--text)}
+.toggle-sub{font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <div class="nav-logo">✈️ <span class="logo-accent">Cadet</span>Compass</div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">홈</a>
+      <a class="nav-link active" href="calculator.html">계산기</a>
+      <a class="nav-link" href="info.html">입시정보</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div style="max-width:1100px;margin:0 auto;padding:0 20px">
+    <h1>🧮 계산기</h1>
+    <p>내신 · 체력 · 신체 · 합격 가능성을 한 곳에서</p>
+  </div>
+</div>
+
+<div class="main-tab-nav">
+  <div class="tab-nav" id="main-tab-nav" style="padding:0 20px">
+    <button class="tab-btn" data-tab="tab-gpa">📚 내신 계산기</button>
+    <button class="tab-btn" data-tab="tab-fitness">🏃 체력 환산기</button>
+    <button class="tab-btn" data-tab="tab-analysis">🎯 합격 분석</button>
+    <button class="tab-btn" data-tab="tab-body">🏥 신체 체크</button>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- ══ TAB: 내신 계산기 ══ -->
+  <div id="tab-gpa" class="tab-panel">
+
+    <div class="g2" style="margin-bottom:18px">
+      <div class="card" style="margin-bottom:0">
+        <div class="section-label">학생 유형</div>
+        <div class="type-select-wrap">
+          <label class="type-radio checked" id="lbl-current">
+            <input type="radio" name="student-type" id="student-type" value="current" checked onchange="onStudentTypeChange(this)">
+            <span>🎓 재학생 (3학년 1학기까지)</span>
+          </label>
+          <label class="type-radio" id="lbl-graduate">
+            <input type="radio" name="student-type" value="graduate" onchange="onStudentTypeChange(this)">
+            <span>📜 졸업생 (3학년 2학기까지)</span>
+          </label>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="section-label">전형 선택</div>
+        <div class="form-group" style="margin-bottom:0">
+          <label for="exam-type-calc">전형 유형 (등급 점수 산정 방식이 달라집니다)</label>
+          <select id="exam-type-calc">
+            <option value="general">일반우선·특별전형 (3점 등급차 / 만점 100점)</option>
+            <option value="principal">고교학교장추천 (6점 등급차 / 만점 200점)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="info info-blue">
+      <strong>반영과목:</strong> 국어·영어·수학·사회·과학 교과 중 석차등급(1~9)이 산출되는 전 이수과목 · 진로선택과목 제외
+      <br>성적 공식: <strong>Σ(등급점수 × 이수단위) ÷ Σ(이수단위)</strong>
+    </div>
+
+    <div id="gpa-semesters"></div>
+
+    <button class="btn btn-primary btn-block" onclick="Calculator.calculate()" style="margin-top:6px">
+      📊 내신 성적 계산하기
+    </button>
+
+    <div class="result-box" id="gpa-result"></div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="card-title">등급별 점수 환산표</div>
+      <table class="tbl">
+        <thead><tr><th>등급</th><th class="c">1</th><th class="c">2</th><th class="c">3</th><th class="c">4</th><th class="c">5</th><th class="c">6</th><th class="c">7</th><th class="c">8</th><th class="c">9</th></tr></thead>
+        <tbody>
+          <tr><td>일반우선·특별</td><td class="c num">100</td><td class="c">97</td><td class="c">94</td><td class="c">91</td><td class="c">88</td><td class="c">85</td><td class="c">82</td><td class="c">79</td><td class="c">76</td></tr>
+          <tr><td>학교장추천</td><td class="c num">200</td><td class="c">194</td><td class="c">188</td><td class="c">182</td><td class="c">176</td><td class="c">170</td><td class="c">164</td><td class="c">158</td><td class="c">152</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ TAB: 체력 환산기 ══ -->
+  <div id="tab-fitness" class="tab-panel">
+
+    <div class="card">
+      <div class="card-title">기본 설정</div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label for="fit-gender">성별</label>
+          <select id="fit-gender">
+            <option value="male">남자</option>
+            <option value="female">여자</option>
+          </select>
+        </div>
+        <div style="background:var(--sky-light);border-radius:8px;padding:12px;font-size:12px;color:var(--sky-mid)">
+          <strong>체력검정 총점: 150점</strong><br>
+          오래달리기 65점 · 윗몸일으키기 45점 · 팔굽혀펴기 40점<br>
+          ⚠️ 달리기 기준 초과 시 즉시 불합격
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏃 오래달리기</div>
+      <div class="section-label" id="run-dist-label">남: 1,500m / 여: 1,200m</div>
+      <div class="info info-red" style="font-size:12px;margin-bottom:14px">
+        불합격 기준: <strong>남자 7분 32초 이상 / 여자 7분 30초 이상</strong> → 즉시 불합격
+      </div>
+      <label>기록 입력</label>
+      <div class="run-time-input">
+        <div>
+          <input type="number" id="run-min" min="0" max="15" placeholder="분" style="text-align:center;font-size:20px;font-weight:700">
+          <div class="text-sm text-muted text-center mt8">분 (minutes)</div>
+        </div>
+        <div class="run-time-colon">:</div>
+        <div>
+          <input type="number" id="run-sec" min="0" max="59" placeholder="초" style="text-align:center;font-size:20px;font-weight:700">
+          <div class="text-sm text-muted text-center mt8">초 (seconds)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="card">
+        <div class="card-title">💪 윗몸일으키기</div>
+        <div class="section-label">2분 / 싯업보드 사용</div>
+        <label for="situp-count">개수</label>
+        <div class="input-row">
+          <input type="number" id="situp-count" min="0" max="200" placeholder="개수 입력" style="font-size:18px;font-weight:700;text-align:center">
+          <span class="input-unit">개</span>
+        </div>
+        <div class="text-sm text-muted mt8">남: 80개↑ 45점 / 여: 70개↑ 45점</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🤸 팔굽혀펴기</div>
+        <div class="section-label">2분 / 30cm 보조대</div>
+        <label for="pushup-count">개수</label>
+        <div class="input-row">
+          <input type="number" id="pushup-count" min="0" max="200" placeholder="개수 입력" style="font-size:18px;font-weight:700;text-align:center">
+          <span class="input-unit">개</span>
+        </div>
+        <div class="text-sm text-muted mt8">남: 70개↑ 40점 / 여: 35개↑ 40점</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-block" onclick="Fitness.calculate()">
+      🏃 체력 점수 계산하기
+    </button>
+
+    <div class="result-box" id="fitness-result"></div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="card-title">점수 환산 기준표 (주요 구간)</div>
+      <div class="g2">
+        <div>
+          <div class="section-label">오래달리기 (남)</div>
+          <table class="tbl" style="font-size:12px">
+            <thead><tr><th>기록</th><th class="c">점수</th></tr></thead>
+            <tbody>
+              <tr><td>5분 30초 이내</td><td class="c num">65.0</td></tr>
+              <tr><td>6분 00초</td><td class="c">56.9</td></tr>
+              <tr><td>6분 30초</td><td class="c">48.9</td></tr>
+              <tr><td>7분 00초</td><td class="c">40.8</td></tr>
+              <tr><td>7분 31초</td><td class="c">32.5</td></tr>
+              <tr style="background:#fce8e8"><td>7분 32초 이상</td><td class="c" style="color:var(--red);font-weight:700">불합격</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="section-label">오래달리기 (여)</div>
+          <table class="tbl" style="font-size:12px">
+            <thead><tr><th>기록</th><th class="c">점수</th></tr></thead>
+            <tbody>
+              <tr><td>5분 40초 이내</td><td class="c num">65.0</td></tr>
+              <tr><td>6분 00초</td><td class="c">59.0</td></tr>
+              <tr><td>6분 30초</td><td class="c">50.1</td></tr>
+              <tr><td>7분 00초</td><td class="c">41.1</td></tr>
+              <tr><td>7분 29초</td><td class="c">32.5</td></tr>
+              <tr style="background:#fce8e8"><td>7분 30초 이상</td><td class="c" style="color:var(--red);font-weight:700">불합격</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB: 합격 분석 ══ -->
+  <div id="tab-analysis" class="tab-panel">
+
+    <div class="info info-navy" style="margin-bottom:18px">
+      💡 <strong>면접 점수는 선택 입력입니다.</strong> 미입력 시 면접 제외 기준으로 예비 분석을 제공합니다.
+      실제 면접 배점이 450~650점으로 매우 크므로, 입력 시 더 정확한 분석이 가능합니다.
+    </div>
+
+    <div class="card">
+      <div class="card-title">전형 선택</div>
+      <div class="form-group">
+        <label for="ana-exam-type">지원 전형</label>
+        <select id="ana-exam-type" onchange="onExamTypeChange()">
+          <option value="general">일반우선 전형 (1차300 + 체력150 + 면접450 + 학생부100)</option>
+          <option value="principal">고교학교장추천 (체력150 + 면접650 + 학생부200)</option>
+          <option value="comprehensive">종합선발 (체력150 + 면접450 + 수능400)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">점수 입력</div>
+
+      <div id="ana-exam1-wrap" class="form-group">
+        <label for="ana-exam1">1차시험 점수 <span style="color:var(--muted);font-weight:400">(만점 300점)</span></label>
+        <div class="input-row">
+          <input type="number" id="ana-exam1" min="0" max="300" placeholder="예: 230">
+          <span class="input-unit">/ 300</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label for="ana-gpa">학생부 점수 <span style="color:var(--muted);font-weight:400">(위 내신 계산기 결과)</span></label>
+          <div class="input-row">
+            <input type="number" id="ana-gpa" min="0" max="200" placeholder="예: 94">
+            <span class="input-unit">점</span>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label for="ana-gpa-grade">가중평균 등급 <span style="color:var(--muted);font-weight:400">(추천 전형 판단용)</span></label>
+          <div class="input-row">
+            <input type="number" id="ana-gpa-grade" min="1" max="9" step="0.1" placeholder="예: 2.3">
+            <span class="input-unit">등급</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:14px">
+        <label for="ana-fitness">체력 총점 <span style="color:var(--muted);font-weight:400">(위 체력 계산기 결과, 만점 150점)</span></label>
+        <div class="input-row">
+          <input type="number" id="ana-fitness" min="0" max="150" placeholder="예: 118">
+          <span class="input-unit">/ 150</span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="interview-toggle">
+        <label class="toggle-switch">
+          <input type="checkbox" id="interview-toggle" onchange="toggleInterviewInput(this)">
+          <span class="toggle-slider"></span>
+        </label>
+        <div>
+          <div class="toggle-label">면접 점수 직접 입력</div>
+          <div class="toggle-sub">체크 시 면접 점수를 포함해 분석합니다. 미체크 시 면접 제외 예비 분석</div>
+        </div>
+      </div>
+
+      <div id="interview-input-wrap" style="display:none" class="form-group">
+        <label for="ana-interview">면접 점수 <span style="color:var(--muted);font-weight:400" id="interview-max-label">(만점 450점)</span></label>
+        <div class="input-row">
+          <input type="number" id="ana-interview" min="0" max="650" placeholder="예: 360">
+          <span class="input-unit">점</span>
+        </div>
+      </div>
+
+      <div id="ana-csat-wrap" style="display:none" class="form-group">
+        <label for="ana-csat">수능 점수 <span style="color:var(--muted);font-weight:400">(만점 400점, 종합선발)</span></label>
+        <div class="input-row">
+          <input type="number" id="ana-csat" min="0" max="400" placeholder="예: 320">
+          <span class="input-unit">/ 400</span>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:14px;margin-bottom:0">
+        <label for="ana-hsat">한국사능력검정 가산점</label>
+        <select id="ana-hsat">
+          <option value="미제출">미제출 (0점)</option>
+          <option value="심화3급">심화 3급 (+2점)</option>
+          <option value="심화2급">심화 2급 (+3.5점)</option>
+          <option value="심화1급">심화 1급 (+5점)</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-block" onclick="Analysis.calculate()">
+      🎯 합격 가능성 분석하기
+    </button>
+
+    <div class="result-box" id="analysis-result"></div>
+
+    <div class="info info-gold" style="margin-top:16px">
+      ⚠️ 합격 가능성 분석은 <strong>참고용</strong>입니다. 실제 커트라인은 매년 지원자 수준에 따라 달라집니다.
+      특히 면접 점수의 비중이 매우 크므로, 점수 외에도 면접 준비에 충분한 시간을 투자하세요.
+    </div>
+  </div>
+
+  <!-- ══ TAB: 신체 체크 ══ -->
+  <div id="tab-body" class="tab-panel">
+
+    <div class="info info-red" style="margin-bottom:18px">
+      ⚠️ <strong>공식 신체검사가 아닙니다.</strong> 이 도구는 사전 참고용이며, 실제 합격 여부는 공군사관학교 공식 신체검사 결과로만 결정됩니다.
+    </div>
+
+    <div class="card">
+      <div class="card-title">기본 정보 입력</div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label for="body-gender">성별</label>
+          <select id="body-gender">
+            <option value="male">남자</option>
+            <option value="female">여자</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label for="body-division">지원 분야</label>
+          <select id="body-division" onchange="onDivisionChange()">
+            <option value="pilot">조종 분야 (공중근무자 신체검사)</option>
+            <option value="nonpilot">비조종 분야 (일반 신체검사)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top:14px">
+        <div class="form-group" style="margin-bottom:0">
+          <label for="body-height">신장 (키)</label>
+          <div class="input-row">
+            <input type="number" id="body-height" min="140" max="220" step="0.1" placeholder="예: 173.5">
+            <span class="input-unit">cm</span>
+          </div>
+          <div class="text-sm text-muted mt8" id="height-range-note">조종: 162~196cm</div>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label for="body-weight">체중</label>
+          <div class="input-row">
+            <input type="number" id="body-weight" min="30" max="200" step="0.1" placeholder="예: 65.0">
+            <span class="input-unit">kg</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:14px;margin-bottom:0">
+        <label for="body-vision">시력 상태</label>
+        <select id="body-vision">
+          <option value="normal">나안시력 0.4 초과 (정상)</option>
+          <option value="corrected">교정시력 1.0 이상 (안경/렌즈)</option>
+          <option value="below04">나안시력 0.4 이하 (굴절교정술 고려)</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-block" onclick="checkBody()">
+      🏥 신체 조건 확인하기 (참고용)
+    </button>
+
+    <div class="result-box" id="body-result"></div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="card-title">조종분야 신장별 체중 기준 (BMI 19~27.5)</div>
+      <div class="info info-gold" style="margin-bottom:12px">신장은 소수점 포함 당일 검사결과 그대로 적용됩니다. 예: 161.9cm → 불합격</div>
+      <div style="overflow-x:auto">
+        <table class="tbl" style="font-size:12px">
+          <thead><tr><th>신장</th><th class="c">최소체중(BMI 19)</th><th class="c">최대체중(BMI 27.5)</th></tr></thead>
+          <tbody id="body-table-rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<div style="text-align:center;padding:24px;font-size:12px;color:var(--muted);border-top:1px solid var(--border);background:var(--white)">
+  Cadet Compass — 2027학년도 제79기 기준 · 참고용 서비스
+</div>
+
+<script src="data/kafaData.js"></script>
+<script src="data/fitnessData.js"></script>
+<script src="js/modules.js"></script>
+<script>
+// 탭 초기화
+Tabs.init('#main-tab-nav .tab-btn', '.tab-panel');
+
+// 내신 계산기 초기화
+Calculator.init();
+
+// 학생 유형 라디오 스타일
+function onStudentTypeChange(el) {
+  document.getElementById('lbl-current').classList.toggle('checked', el.value==='current'||el.id==='student-type');
+  document.getElementById('lbl-graduate').classList.toggle('checked', el.value==='graduate');
+}
+
+// 전형 변경 시 UI 갱신
+function onExamTypeChange() {
+  const t = document.getElementById('ana-exam-type').value;
+  document.getElementById('ana-exam1-wrap').style.display  = t==='general'  ? '' : 'none';
+  document.getElementById('ana-csat-wrap').style.display   = t==='comprehensive' ? '' : 'none';
+  const interMax = t==='principal' ? 650 : 450;
+  document.getElementById('interview-max-label').textContent = `(만점 ${interMax}점)`;
+  document.getElementById('ana-interview').max = interMax;
+}
+
+// 면접 토글
+function toggleInterviewInput(el) {
+  document.getElementById('interview-input-wrap').style.display = el.checked ? '' : 'none';
+}
+
+// 분야 변경
+function onDivisionChange() {
+  const v = document.getElementById('body-division').value;
+  document.getElementById('height-range-note').textContent = v==='pilot' ? '조종: 162~196cm' : '비조종 남: 159~204cm / 여: 152~185cm';
+}
+
+// 신체 기준표 렌더링
+function renderBodyTable() {
+  const tbody = document.getElementById('body-table-rows');
+  if (!tbody) return;
+  const entries = Object.entries(BODY_PILOT.table);
+  tbody.innerHTML = entries.map(([h,[mn,mx]])=>
+    `<tr><td>${h}cm</td><td class="c">${mn}kg</td><td class="c">${mx}kg</td></tr>`
+  ).join('');
+}
+renderBodyTable();
+</script>
+</body>
+</html>
